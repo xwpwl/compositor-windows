@@ -1,0 +1,13 @@
+node_modules/
+dist/
+release/
+work/
+*.log
+.playwright-mcp/
+outputs/
+.env
+.env.*
+!.env.example
+automation.json
+local-config.json
+*.cwdoc

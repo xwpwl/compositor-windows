@@ -1,0 +1,6 @@
+interface:
+  display_name: "Compositor Windows 修图"
+  short_description: "让 Codex 操作 Windows 编辑器，查看画布、修图并导出可编辑工程"
+  default_prompt: "使用 $compositor-windows-edit 操作 Windows 编辑器修这张图，保留指定主体，检查效果并导出成片和可编辑工程。"
+policy:
+  allow_implicit_invocation: true

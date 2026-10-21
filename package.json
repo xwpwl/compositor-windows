@@ -1,0 +1,77 @@
+{
+  "name": "compositor-windows-community",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An independent Windows image editor inspired by Compositor",
+  "author": "Community Windows adaptation",
+  "license": "MIT",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "start": "electron .",
+    "package": "npm run build && electron-builder --win dir",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "lucide-react": "^0.468.0",
+    "ag-psd": "^29.0.0",
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.0",
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.12",
+    "playwright": "^1.56.1"
+  },
+  "build": {
+    "appId": "org.community.compositor.windows",
+    "productName": "Compositor Windows",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "!node_modules{,/**/*}"
+    ],
+    "win": {
+      "target": "dir",
+      "signAndEditExecutable": false
+    },
+    "asar": true,
+    "extraFiles": [
+      {
+        "from": "scripts",
+        "to": "scripts",
+        "filter": [
+          "*.mjs",
+          "*.cmd"
+        ]
+      },
+      {
+        "from": ".",
+        "to": ".",
+        "filter": [
+          "README.md",
+          "AI_WORKFLOW.md",
+          "FEATURE_PARITY.md",
+          "LICENSE",
+          "THIRD_PARTY_NOTICES.md",
+          "启动AI桥接.cmd",
+          "VALIDATION.md"
+        ]
+      }
+    ]
+  }
+}
