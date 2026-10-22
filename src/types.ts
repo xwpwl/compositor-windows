@@ -113,7 +113,27 @@ export interface NativeFile {
   bytes: Uint8Array;
   files?: Record<string, Uint8Array>;
 }
+export interface CodexSetupStatus {
+  configured: boolean;
+  codex: { available: boolean; executable?: string | null; home: string };
+  skill: { installed: boolean; path: string };
+  mcp: { registered: boolean; name: string };
+  reloadRequired: boolean;
+  message: string;
+  backupDirectory?: string;
+  errorCode?: string;
+}
+export interface CodexConnectionResult {
+  ok: boolean;
+  message: string;
+  toolCount?: number;
+  documentName?: string;
+}
 export interface DesktopBridge {
+  getCodexStatus(): Promise<CodexSetupStatus>;
+  setupCodex(): Promise<CodexSetupStatus>;
+  chooseCodexExecutable(): Promise<CodexSetupStatus | null>;
+  checkCodexConnection(): Promise<CodexConnectionResult>;
   openFiles(): Promise<NativeFile[] | null>;
   openProjectFolder(): Promise<NativeFile | null>;
   saveFile(args: {

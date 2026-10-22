@@ -1,10 +1,22 @@
 # 连接、脚本与大文件
 
-## 安装 skill 与配置应用目录
+## 一键连接：推荐安装方式
 
 先运行 GitHub Releases 中的 Windows 安装程序，或按仓库说明从源码构建应用。每用户安装的默认应用目录为 `%LOCALAPPDATA%\Programs\Compositor Windows`；若安装时选择了其他位置，以实际位置为准。应用目录中应有 `Compositor Windows.exe` 和 `scripts/mcp-server.mjs`，不要只复制 EXE。
 
-配套 skill 位于应用安装目录的 `skills/compositor-windows-edit`，也可从同一 Release 下载独立 Skill ZIP 并解压；源码仓库中也有同一文件夹。把 `compositor-windows-edit` 整个文件夹复制到 Codex 的 skill 目录：设置了 `CODEX_HOME` 时为 `%CODEX_HOME%\skills\compositor-windows-edit`，否则为 `%USERPROFILE%\.codex\skills\compositor-windows-edit`。确认最终路径是 `…\skills\compositor-windows-edit\SKILL.md`，并保留 `scripts`、`references` 和 `agents` 子目录；不要只复制 `SKILL.md` 或多套一层文件夹。重新加载 skills 或开启新聊天后，可用 `$compositor-windows-edit` 调用。若目标处已有同名 skill，先保留其本机配置，再按需要更新文件。
+安装并登录 Codex 后，在 Compositor Windows 顶栏点击 **连接 Codex**，进入 **Codex** 面板，点击 **一键连接 Codex**。程序会定位已安装的 Codex CLI，将完整 Skill 安装到用户技能目录，生成填写实际应用路径的 `local-config.json`，并注册 `compositor_windows` MCP。找不到 CLI 时点击 **选择 Codex 程序**，选择已有的 `codex.exe`；不会自动下载或登录 Codex。
+
+新用户默认安装到 `%USERPROFILE%\.agents\skills\compositor-windows-edit`。程序也检查当前 Codex profile 的 `skills` 目录和旧 `%USERPROFILE%\.codex\skills`，已有唯一一份本 Skill 时在原位置更新；profile 目录由 `CODEX_HOME` 决定，未设置时为 `%USERPROFILE%\.codex`。不要在多个目录同时安装同名 Skill。连接界面显示实际目标位置，更新前备份原 Skill 和配置；同名副本冲突时先处理界面指出的位置。
+
+点击 **测试本机连接** 确认桥接能读取正在运行的编辑器，然后重启 Codex 并开启新聊天，让它加载 Skill 和 MCP。测试本机连接不代表旧聊天已刷新。首次工具调用时按 Codex 提示授权；配置过程不会更改审批或沙箱设置。更新或移动应用后，可用 **更新 / 修复配置** 更新连接路径。
+
+若 MCP 已被禁用或限制工具，一键连接会保留限制并提示在 Codex 中处理，不会自行启用。同名 HTTP 服务不会被替换。备份位于当前 Codex profile 的 `compositor-backups` 目录，包含原文件和 `restore-info.json`；界面显示具体位置。
+
+当前位置与配置规则参考 [OpenAI 官方 Skill 文档](https://learn.chatgpt.com/docs/build-skills)、[MCP 文档](https://learn.chatgpt.com/docs/extend/mcp) 和 [CODEX_HOME 说明](https://learn.chatgpt.com/docs/config-file/environment-variables)。一键连接面向本机 Windows Codex，不会让网页聊天自动访问电脑。
+
+## 手动安装 Skill 与配置应用目录
+
+配套 Skill 位于应用安装目录的 `skills/compositor-windows-edit`，也可从同一 Release 下载独立 Skill ZIP 并解压；源码仓库中也有同一文件夹。新装时把 `compositor-windows-edit` 整个文件夹复制到 `%USERPROFILE%\.agents\skills`。如果当前 profile 的 `%CODEX_HOME%\skills`（默认 `%USERPROFILE%\.codex\skills`）已经有本 Skill，则备份后更新该位置，不另装一份。确认最终路径是 `…\skills\compositor-windows-edit\SKILL.md`，并保留 `scripts`、`references` 和 `agents` 子目录；不要只复制 `SKILL.md` 或多套一层文件夹。重新加载 skills 或开启新聊天后，可用 `$compositor-windows-edit` 调用。
 
 在安装后的 skill 根目录，把 [local-config.example.json](../local-config.example.json) 复制为 `local-config.json`，将 `appDirectory` 改成实际应用目录的完整路径。这里不会展开 `%LOCALAPPDATA%` 等环境变量；JSON 中使用正斜杠或双反斜杠。示例中的 `C:/Apps/Compositor-Windows` 只是自选安装位置示例，不代表程序已安装：
 
@@ -25,7 +37,7 @@ $env:COMPOSITOR_APP_DIR = $compositorAppDir
 
 移动应用后更新上述路径；移动 skill 后，确认配置文件仍在新的 skill 根目录。`local-config.json` 是个人本机配置，不提交到仓库。不要通过整盘搜索或读取其他账号配置来猜测路径。
 
-应用安装程序只附带 skill 文件，不会将它复制到 Codex，也不会修改 Codex 配置；手动安装 skill 同样不会注册 MCP 服务。若要在 Codex 中直接使用五个 MCP 工具，按应用目录中的 `AI_WORKFLOW.md` 配置 `compositor_windows`，并将启动命令指向实际应用目录。重新加载 MCP 或开启新聊天后检查工具是否可用。未注册服务或当前聊天未加载工具时，可直接使用下面的 fallback 脚本；它不要求修改 Codex 全局配置。
+安装程序附带 Skill；应用中的一键连接负责安装 Skill 并配置 MCP。仅手动复制 Skill 不会注册 MCP 服务。若要手动注册，按应用目录中的 `AI_WORKFLOW.md` 配置 `compositor_windows`，并将启动命令指向实际应用目录。重新加载 MCP 或重启 Codex、开启新聊天后检查工具是否可用。未注册服务或当前聊天未加载工具时，可直接使用下面的 fallback 脚本；它不要求修改 Codex 全局配置。
 
 ## 启动与连接
 

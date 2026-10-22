@@ -58,6 +58,7 @@ import {
 } from "lucide-react";
 import { editor as e, toolNames, blendModes } from "./editor";
 import { Stage } from "./Stage";
+import { CodexSetup } from "./CodexSetup";
 import {
   createCanvas,
   makeLayer,
@@ -644,9 +645,9 @@ export function App() {
           ))}
         </nav>
         <div className="header-actions">
-          <button className="ai-pill" onClick={() => setPanel("ai")}>
-            <span className="status-dot" />
-            {window.desktop ? "AI 接口就绪" : "浏览器预览"}
+          <button className="ai-pill" onClick={() => setPanel("ai")} title="配置 Codex 修图">
+            <Sparkles size={14} />
+            连接 Codex
           </button>
           <button className="save-button" onClick={() => act("save")}>
             <Save size={14} />
@@ -938,17 +939,20 @@ export function App() {
                   </button>
                   <button onClick={demo}>试用示例</button>
                 </div>
+                <button className="welcome-codex" onClick={() => setPanel("ai")}>
+                  <Sparkles size={13} />配置 Codex 修图
+                </button>
                 <span>PNG · JPEG · WebP · PSD · Compositor 工程</span>
               </div>
             )}
         </section>
-        <aside className="right-panel">
+        <aside className={"right-panel" + (panel === "ai" ? " codex-open" : "")}>
           <div className="panel-tabs">
             {[
               ["properties", "属性"],
               ["adjustments", "调色"],
               ["effects", "效果"],
-              ["ai", "AI"],
+              ["ai", "Codex"],
             ].map(([key, name]) => (
               <button
                 className={panel === key ? "selected" : ""}
@@ -959,7 +963,7 @@ export function App() {
               </button>
             ))}
           </div>
-          <div className="inspector">
+          <div className={"inspector" + (panel === "ai" ? " ai-inspector" : "")}>
             <fieldset
               disabled={!!l && e.isLocked(l) && panel !== "ai"}
               className="inspector-fields"
@@ -1337,22 +1341,9 @@ export function App() {
                 ))}
               {panel === "ai" && (
                 <div className="ai-panel">
-                  <div className="ai-symbol">
-                    <Sparkles size={20} />
-                    <span>让 Codex 帮你编辑</span>
-                  </div>
-                  <p>
-                    通过本地 MCP 接口，AI
-                    可以查看画布、调整图层、修图并导出。所有图像处理都在本机完成。
-                  </p>
-                  <div className="ai-examples">
-                    <span>“把照片调暖，稍微提亮阴影”</span>
-                    <span>“裁成 4:5，右下角加上标题”</span>
-                    <span>“去除白底，导出透明 PNG”</span>
-                  </div>
-                  <div className="section-label">
-                    结构化命令 <Terminal size={13} />
-                  </div>
+                  <CodexSetup onOpenPhoto={() => act("open")} />
+                  <details className="codex-debug">
+                    <summary><Terminal size={13} />高级：结构化命令调试</summary>
                   <textarea
                     className="command-input"
                     aria-label="AI 命令 JSON"
@@ -1376,6 +1367,7 @@ export function App() {
                   <p className="tiny">
                     此处是命令调试框。自然语言修图请在连接 MCP 的 Codex 中提出。
                   </p>
+                  </details>
                 </div>
               )}
             </fieldset>

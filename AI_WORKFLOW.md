@@ -1,8 +1,25 @@
 # 用 Codex 操作 Compositor Windows
 
-先启动 `Compositor Windows.exe`，再连接下面的 MCP 服务。AI 执行的编辑直接出现在桌面画布和图层面板中；你可以继续手动调整或撤销。
+先启动 `Compositor Windows.exe`，在 Codex 面板连接 Codex。AI 执行的编辑直接出现在桌面画布和图层面板中；你可以继续手动调整或撤销。
 
-## 一次性连接配置
+## 推荐：一键安装 Skill 和 MCP
+
+1. 先安装并登录 Codex，再启动 Compositor Windows，点击顶栏 **连接 Codex**，打开 **Codex** 面板。
+2. 点击 **一键连接 Codex**。软件自动定位已安装的 Codex CLI；未找到时点击 **选择 Codex 程序**，选择已有的 `codex.exe`。软件不下载 Codex、不配置模型账号。
+3. 配置过程安装 `compositor-windows-edit` Skill，填写当前应用目录，并通过 Codex CLI 注册 `compositor_windows` STDIO MCP。它使用应用自带运行时，给桥接进程单独设置 `ELECTRON_RUN_AS_NODE=1`，无需另装 Node.js。
+4. 点击 **测试本机连接**，检查检测结果，然后重启 Codex、开启新聊天。可以说：“用 Compositor Windows 修这张图，保留人物，自然调色，先看画布再操作。”
+
+软件读取当前进程的 `CODEX_HOME`；未设置时使用 `%USERPROFILE%\.codex`。MCP 设置写入该目录的 `config.toml`。新用户的 Skill 默认位于 `%USERPROFILE%\.agents\skills\compositor-windows-edit`；也会检查当前 profile 的 `skills` 目录和旧 `%USERPROFILE%\.codex\skills`，如果其中已有唯一一份本 Skill，则在该位置更新。不要在多个受扫描目录保留同名 Skill；检测到冲突时先按界面提示处理。
+
+更新前会将原配置、原 Skill 和恢复位置说明备份到 `%CODEX_HOME%\compositor-backups\<时间戳-随机标识>`（未设置 `CODEX_HOME` 时为 `%USERPROFILE%\.codex\compositor-backups`），界面显示具体位置。配置由 Codex 官方 CLI 处理；旧 STDIO 连接使用官方配置接口仅更新程序、脚本和运行时环境字段，保留其他服务、模型及审批设置。设置过程中若检测到配置被其他程序同时修改，会停止写入；处理后可重新连接。程序没有改动系统执行策略或 Codex 的沙箱权限。
+
+若该 MCP 已被禁用或限制工具，软件会保留限制并提示在 Codex 中处理，不会自动放开权限。同名 HTTP 服务也不会被替换。旧 Codex 不支持安全更新接口时，会保留原配置并提示更新 Codex或手动处理旧服务。
+
+连接检测验证的是本机配置和编辑器可达；它不能替已经运行的 Codex 聊天重新加载工具。因此仍需在 Codex 中重启/重新加载 MCP，并通过新聊天确认五个工具可用。换了安装目录或更新便携路径后，点击 **更新 / 修复配置** 更新路径即可。
+
+位置和配置规则参考 [OpenAI 官方 Skill 文档](https://learn.chatgpt.com/docs/build-skills)、[MCP 文档](https://learn.chatgpt.com/docs/extend/mcp) 与 [CODEX_HOME 环境变量说明](https://learn.chatgpt.com/docs/config-file/environment-variables)。桌面应用和 CLI 的本地配置与网页托管聊天不同；此功能面向同一 Windows 用户下的本机 Codex。
+
+## 手动连接：高级用法
 
 以下示例假设完整便携程序放在该目录；请替换为自己的实际路径：
 
@@ -10,13 +27,13 @@
 C:\Apps\Compositor-Windows
 ```
 
-首次使用前打开桌面程序，然后在 Codex 中注册下面的 MCP 服务。配置后重启 Codex 或重新加载 MCP 服务，检查是否出现五个工具。仓库不会自动注册服务。
+首次使用前打开桌面程序，然后在 Codex 中注册下面的 MCP 服务。配置后重启 Codex 或重新加载 MCP 服务，检查是否出现五个工具。已完成一键连接时无需重复添加。
 
 如果移动了文件夹，更新配置中的路径。下面选择一种方式，不要重复添加同名服务。
 
 ### 方式 A：使用自带 Electron 运行时，无需安装 Node.js
 
-在 Codex 的 MCP 设置中添加 STDIO 服务，或把以下块加入现有 `config.toml`。默认用户配置通常位于 `%USERPROFILE%\.codex\config.toml`；保留文件里的其他设置。
+在 Codex 的 MCP 设置中添加 STDIO 服务，或把以下块加入现有 `config.toml`。默认用户配置通常位于 `%USERPROFILE%\.codex\config.toml`；设置了 `CODEX_HOME` 时使用 `%CODEX_HOME%\config.toml`。保留文件里的其他设置。
 
 ```toml
 [mcp_servers.compositor_windows]
@@ -119,6 +136,10 @@ MCP 进程可以读取 `compositor_open_image` 指定的本地文件，并写入
 
 | 现象 | 处理 |
 | --- | --- |
+| 一键连接找不到 Codex CLI | 先安装 Codex，或在连接界面选择现有的 `codex.exe`；不需要另装 Node.js |
+| 一键连接成功，当前聊天仍没有工具 | 重启 Codex/重新加载 MCP，再开启新聊天；本机检测不代表旧聊天已经刷新 |
+| MCP 已禁用、工具受限或同名服务类型冲突 | 在 Codex 中检查原设置；一键连接会保留限制，不会自动启用或替换其他服务 |
+| Skill 位置冲突或配置被同时修改 | 按界面指出的位置检查同名 Skill，或等待其他配置操作结束，再重新连接；保留备份 |
 | “尚未找到运行中的 Compositor Windows” | 先打开桌面应用，等画布出现；确认使用同一 Windows 用户 |
 | “无法连接” | 原实例可能已退出，重新启动桌面应用；不要手工固定旧端口或令牌 |
 | MCP 没有 5 个工具 | 核对脚本绝对路径，保留整套 `scripts`，重启 MCP 服务 |

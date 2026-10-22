@@ -24,6 +24,8 @@ const {
   LIMITS,
 } = require("./files.cjs");
 const { createAutomationBridge } = require("./automation.cjs");
+const { createCodexSetup } = require("./codex-setup.cjs");
+const { checkCodexConnection } = require("./codex-connection.cjs");
 
 app.setName("Compositor Windows");
 const userData = process.env.COMPOSITOR_USER_DATA
@@ -43,6 +45,10 @@ let cleanupStarted = false;
 let cleanupFinished = false;
 
 const automation = createAutomationBridge({ app, getWindow: () => mainWindow });
+const appDirectory = app.isPackaged ? path.dirname(process.execPath) : app.getAppPath();
+const codexSetup = createCodexSetup({ appDirectory, executablePath: process.execPath });
+let selectedCodexExecutable;
+let connectionCheck;
 function trusted(event) {
   return (
     mainWindow &&
@@ -193,6 +199,42 @@ function registerIPC() {
         throw error;
       }
     });
+  const codexOptions = () => ({ codexExecutable: selectedCodexExecutable });
+  const withSetupError = async (operation) => {
+    try { return await operation(); }
+    catch (error) {
+      // Electron serializes Error.message but drops custom fields over IPC.
+      throw new Error(`${error.message || "Codex 配置失败。"}${error.backupDirectory ? `\n原始配置备份：${error.backupDirectory}` : ""}`);
+    }
+  };
+  handle("codex:status", () => codexSetup.status(codexOptions()));
+  handle("codex:setup", () => withSetupError(() => codexSetup.install(codexOptions())));
+  handle("codex:choose-executable", async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: "选择 Codex 命令行程序",
+      properties: ["openFile"],
+      filters: [{ name: "Codex 程序", extensions: ["exe"] }],
+    });
+    if (result.canceled || !result.filePaths[0]) return null;
+    if (path.basename(result.filePaths[0]).toLowerCase() !== "codex.exe")
+      throw new Error("请选择 Codex 自带或官方 CLI 的 codex.exe。");
+    selectedCodexExecutable = result.filePaths[0];
+    return codexSetup.status(codexOptions());
+  });
+  handle("codex:check", async () => {
+    if (!connectionCheck) {
+      connectionCheck = (async () => {
+        const configured = await codexSetup.status(codexOptions());
+        if (!configured.configured) throw new Error("请先点击一键连接 Codex，完成 Skill 和 MCP 配置。");
+        return checkCodexConnection({
+          executablePath: process.execPath,
+          appDirectory,
+          discoveryPath: automation.discoveryPath,
+        });
+      })().finally(() => { connectionCheck = null; });
+    }
+    return connectionCheck;
+  });
   handle("files:open", async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
       title: "打开图像或工程",

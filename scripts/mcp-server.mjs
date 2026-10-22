@@ -281,7 +281,7 @@ export function createDispatcher(call = rpc) {
         return respond({
           protocolVersion,
           capabilities: { tools: { listChanged: false } },
-          serverInfo: { name: "compositor-windows", version: "0.1.0" },
+          serverInfo: { name: "compositor-windows", version: "0.1.1" },
           instructions:
             "Control the running local Compositor Windows editor. First read state and canvas; use structured edits, then verify the canvas and export. Changes remain editable in the desktop app; save as cwdoc to preserve them.",
         });

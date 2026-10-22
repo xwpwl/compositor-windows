@@ -70,7 +70,8 @@ try {
     .last()
     .click();
   assert.equal(await page.locator(".mask-chip").count(), 1);
-  await page.getByRole("button", { name: "AI", exact: true }).click();
+  await page.getByRole("button", { name: "Codex", exact: true }).click();
+  await page.locator("summary").filter({ hasText: "高级：结构化命令调试" }).click();
   await page
     .getByRole("textbox", { name: "AI 命令 JSON", exact: true })
     .fill(

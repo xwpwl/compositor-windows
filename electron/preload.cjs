@@ -3,6 +3,10 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("desktop", {
+  getCodexStatus: () => ipcRenderer.invoke("codex:status"),
+  setupCodex: () => ipcRenderer.invoke("codex:setup"),
+  chooseCodexExecutable: () => ipcRenderer.invoke("codex:choose-executable"),
+  checkCodexConnection: () => ipcRenderer.invoke("codex:check"),
   openFiles: () => ipcRenderer.invoke("files:open"),
   openProjectFolder: () => ipcRenderer.invoke("project:open"),
   saveFile: (args) => ipcRenderer.invoke("files:save", args),
