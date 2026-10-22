@@ -4,9 +4,17 @@
 
 本项目参考 [Robbie Tilton / Wonder Assembly 的 Compositor](https://github.com/robbietilton/Compositor) 的工作流与 `.comp` 文件规范，用 Electron、TypeScript 和 Canvas 重新实现。它是独立的社区版本，未获得原作者或 Adobe 的官方背书。目前不是原版的完整复刻，实际覆盖范围见 [FEATURE_PARITY.md](FEATURE_PARITY.md)。
 
+## 下载与安装
+
+从 [GitHub Releases](https://github.com/xwpwl/compositor-windows/releases/latest) 下载 Windows x64 安装包。`v0.1.0` 的文件名为 `Compositor-Windows-Setup-0.1.0-x64.exe`，内含运行时、MCP 桥接脚本和配套 Codex Skill，无需另装 Node.js。
+
+运行安装程序，选择安装范围和目录，按向导完成安装，再从桌面或开始菜单打开 Compositor Windows。安装结束后不会自动启动应用。此版本未进行代码签名，Windows 可能显示“未知发布者”或 SmartScreen 提示；请核对下载来源和 Release 中提供的 SHA-256 校验值。
+
+安装目录中的 `skills/compositor-windows-edit` 是配套 Skill，按下文说明复制到 Codex 技能目录并配置应用路径。Releases 也提供独立 Skill ZIP，便于单独安装或更新。安装程序不会自动修改 Codex 配置。
+
 ## 先运行，再连接 AI
 
-1. 按下文“从源码运行”构建程序；需要便携目录时运行 `npm run package`，保留生成目录里的 `resources`、DLL、`scripts` 等文件。
+1. 安装上述 Release，或按下文“从源码运行”构建程序；需要便携目录时运行 `npm run package`，保留生成目录里的 `resources`、DLL、`scripts` 等文件。
 2. 双击 `Compositor Windows.exe`。桌面版已经带运行时，无需安装 Node.js。
 3. 用“文件 → 打开”打开图片，或让已连接的 Codex 打开本地图片路径。
 4. 按 [AI_WORKFLOW.md](AI_WORKFLOW.md) 配置本地 MCP 服务，重新加载服务后在 Codex 中提出修图要求。仓库不会自动修改你的 Codex 配置。
@@ -23,8 +31,8 @@
 
 仓库包含 [compositor-windows-edit](skills/compositor-windows-edit/SKILL.md)，提供画布检查、主体保留、局部蒙版调色、导出和大工程打开流程，以及不依赖另装 Node.js 的 MCP 调用脚本。
 
-1. 将 `skills/compositor-windows-edit` 整个文件夹复制到 `%USERPROFILE%\.codex\skills`，或已配置的 `$CODEX_HOME/skills`。
-2. 若使用随附调用脚本，将 skill 中的 `local-config.example.json` 复制为 `local-config.json`，把 `appDirectory` 改为完整便携目录；也可用 `-AppDir` 或 `COMPOSITOR_APP_DIR` 指定。个人配置已被 Git 忽略。
+1. 将安装目录、仓库或独立 Skill ZIP 中的 `compositor-windows-edit` 整个文件夹复制到 `%USERPROFILE%\.codex\skills`，或已配置的 `$CODEX_HOME/skills`；复制后应能找到 `skills/compositor-windows-edit/SKILL.md`。
+2. 若使用随附调用脚本，将 skill 中的 `local-config.example.json` 复制为 `local-config.json`，把 `appDirectory` 改为包含 `Compositor Windows.exe` 的安装目录或完整便携目录；也可用 `-AppDir` 或 `COMPOSITOR_APP_DIR` 指定。个人配置已被 Git 忽略。
 3. 重新加载技能后，可使用 `$compositor-windows-edit 用 Windows 版修这张图，保留中间人物，自然调色`。
 
 已加载 MCP 时 skill 优先直接调用工具；尚未加载时可使用随附脚本。具体连接方式见 [Skill 连接说明](skills/compositor-windows-edit/references/connection.md)。
@@ -76,7 +84,15 @@ npm start
 npm run package
 ```
 
-输出位于 `release/win-unpacked`。打包配置自动包含 `scripts` 目录、`启动AI桥接.cmd` 和说明文档；分发时保留完整目录，供外部 MCP 客户端运行。
+输出位于 `release/win-unpacked`。打包配置自动包含 `scripts` 目录、`skills/compositor-windows-edit`、`启动AI桥接.cmd` 和说明文档；分发时保留完整目录，供外部 MCP 客户端运行。Skill 的 `local-config.json` 不会打包。
+
+生成 Windows x64 安装包：
+
+```powershell
+npm run package:installer
+```
+
+`v0.1.0` 输出为 `release/Compositor-Windows-Setup-0.1.0-x64.exe`。该命令构建 NSIS 向导安装包，可选择安装目录、创建桌面及开始菜单快捷方式；不会自动发布到 GitHub，也不会进行代码签名。首次构建需要下载 Electron 与 NSIS 打包工具。
 
 验证命令：
 

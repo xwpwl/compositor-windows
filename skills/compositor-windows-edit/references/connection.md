@@ -2,11 +2,11 @@
 
 ## 安装 skill 与配置应用目录
 
-先准备完整的 Compositor Windows 应用目录：其中应有 `Compositor Windows.exe` 和 `scripts/mcp-server.mjs`。不要只复制 EXE；如果取得的是源码，先按仓库说明构建应用。
+先运行 GitHub Releases 中的 Windows 安装程序，或按仓库说明从源码构建应用。每用户安装的默认应用目录为 `%LOCALAPPDATA%\Programs\Compositor Windows`；若安装时选择了其他位置，以实际位置为准。应用目录中应有 `Compositor Windows.exe` 和 `scripts/mcp-server.mjs`，不要只复制 EXE。
 
-把仓库中的 `skills/compositor-windows-edit` 整个文件夹复制到 Codex 的 skill 目录：设置了 `CODEX_HOME` 时为 `%CODEX_HOME%\skills\compositor-windows-edit`，否则为 `%USERPROFILE%\.codex\skills\compositor-windows-edit`。保留 `scripts`、`references` 和 `agents` 子目录；不要只复制 `SKILL.md`。重新加载 skills 或开启新聊天后，可用 `$compositor-windows-edit` 调用。若目标处已有同名 skill，先保留其本机配置，再按需要更新文件。
+配套 skill 位于应用安装目录的 `skills/compositor-windows-edit`，也可从同一 Release 下载独立 Skill ZIP 并解压；源码仓库中也有同一文件夹。把 `compositor-windows-edit` 整个文件夹复制到 Codex 的 skill 目录：设置了 `CODEX_HOME` 时为 `%CODEX_HOME%\skills\compositor-windows-edit`，否则为 `%USERPROFILE%\.codex\skills\compositor-windows-edit`。确认最终路径是 `…\skills\compositor-windows-edit\SKILL.md`，并保留 `scripts`、`references` 和 `agents` 子目录；不要只复制 `SKILL.md` 或多套一层文件夹。重新加载 skills 或开启新聊天后，可用 `$compositor-windows-edit` 调用。若目标处已有同名 skill，先保留其本机配置，再按需要更新文件。
 
-在安装后的 skill 根目录，把 [local-config.example.json](../local-config.example.json) 复制为 `local-config.json`，将 `appDirectory` 改成实际应用目录。示例中的 `C:/Apps/Compositor-Windows` 只是安装位置示例，不代表程序已安装：
+在安装后的 skill 根目录，把 [local-config.example.json](../local-config.example.json) 复制为 `local-config.json`，将 `appDirectory` 改成实际应用目录的完整路径。这里不会展开 `%LOCALAPPDATA%` 等环境变量；JSON 中使用正斜杠或双反斜杠。示例中的 `C:/Apps/Compositor-Windows` 只是自选安装位置示例，不代表程序已安装：
 
 ```json
 {"appDirectory":"C:/Apps/Compositor-Windows"}
@@ -15,15 +15,17 @@
 也可不创建配置文件，在每次运行时传 `-AppDir`，或仅为当前进程设置 `COMPOSITOR_APP_DIR`。优先级为 `-AppDir` > `COMPOSITOR_APP_DIR` > `local-config.json`；建议使用绝对路径。配置文件中的相对路径以 skill 根目录为基准，命令参数和环境变量中的相对路径以当前工作目录为基准。以下命令在 skill 目录运行：
 
 ```powershell
-.\scripts\Invoke-Compositor.ps1 -ListTools -AppDir 'C:\Apps\Compositor-Windows'
+$compositorAppDir = Join-Path $env:LOCALAPPDATA 'Programs\Compositor Windows'
+# 若安装时选择了其他目录，将上面的值改为实际绝对路径。
+.\scripts\Invoke-Compositor.ps1 -ListTools -AppDir $compositorAppDir
 # 或为当前 PowerShell 会话指定目录：
-$env:COMPOSITOR_APP_DIR = 'C:\Apps\Compositor-Windows'
+$env:COMPOSITOR_APP_DIR = $compositorAppDir
 .\scripts\Invoke-Compositor.ps1 -ListTools
 ```
 
 移动应用后更新上述路径；移动 skill 后，确认配置文件仍在新的 skill 根目录。`local-config.json` 是个人本机配置，不提交到仓库。不要通过整盘搜索或读取其他账号配置来猜测路径。
 
-安装 skill 不会注册 MCP 服务。若要在 Codex 中直接使用五个 MCP 工具，按应用目录中的 `AI_WORKFLOW.md` 配置 `compositor_windows`，并将启动命令指向实际应用目录。重新加载 MCP 或开启新聊天后检查工具是否可用。未注册服务或当前聊天未加载工具时，可直接使用下面的 fallback 脚本；它不要求修改 Codex 全局配置。
+应用安装程序只附带 skill 文件，不会将它复制到 Codex，也不会修改 Codex 配置；手动安装 skill 同样不会注册 MCP 服务。若要在 Codex 中直接使用五个 MCP 工具，按应用目录中的 `AI_WORKFLOW.md` 配置 `compositor_windows`，并将启动命令指向实际应用目录。重新加载 MCP 或开启新聊天后检查工具是否可用。未注册服务或当前聊天未加载工具时，可直接使用下面的 fallback 脚本；它不要求修改 Codex 全局配置。
 
 ## 启动与连接
 

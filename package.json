@@ -12,6 +12,7 @@
     "build": "tsc --noEmit && vite build",
     "start": "electron .",
     "package": "npm run build && electron-builder --win dir",
+    "package:installer": "npm run build && electron-builder --win nsis --x64 --publish never",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
@@ -49,8 +50,25 @@
       "target": "dir",
       "signAndEditExecutable": false
     },
+    "nsis": {
+      "artifactName": "Compositor-Windows-Setup-${version}-${arch}.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": false
+    },
     "asar": true,
     "extraFiles": [
+      {
+        "from": "skills/compositor-windows-edit",
+        "to": "skills/compositor-windows-edit",
+        "filter": [
+          "**/*",
+          "!local-config.json"
+        ]
+      },
       {
         "from": "scripts",
         "to": "scripts",

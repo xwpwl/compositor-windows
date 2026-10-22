@@ -7,7 +7,7 @@ description: "操作 Compositor Windows 社区重写版，在实际桌面软件�
 
 用正在运行的 Windows 编辑器处理图像，让修改出现在用户的桌面画布中。软件是独立社区版，能力以当前工具 schema 和实际结果为准。
 
-首次使用先按 [connection.md](references/connection.md) 安装整个 skill 文件夹并配置应用目录。分发包只提供 [local-config.example.json](local-config.example.json)，不包含本机路径或已注册的 MCP 连接；可复制为 `local-config.json` 后编辑，也可用 `-AppDir` / `COMPOSITOR_APP_DIR` 指定应用位置。
+首次使用先按 [connection.md](references/connection.md) 从应用安装目录或独立 Skill ZIP 安装整个 skill 文件夹，并配置实际应用目录。分发包只提供 [local-config.example.json](local-config.example.json)，不包含本机路径或已注册的 MCP 连接；可复制为 `local-config.json` 后编辑，也可用 `-AppDir` / `COMPOSITOR_APP_DIR` 指定应用位置。
 
 ## 连接与选定文档
 
